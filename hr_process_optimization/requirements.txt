@@ -1,0 +1,8 @@
+# Requirements for LLM-Based HR Process Optimization Application
+fastapi==0.68.1
+uvicorn==0.15.0
+sqlalchemy==1.4.25
+python-dotenv==0.19.2
+passlib==1.7.4
+pydantic==1.9.0
+aiosqlite==0.18.0
