@@ -1,30 +1,17 @@
-from sqlalchemy import Column, Integer, String
-from app.database import Base
-from pydantic import BaseModel
+from sqlalchemy import Boolean, Column, Integer, String, Enum
+from app.utils.database import Base
+from app.schemas.schemas import Role
 
 
 class User(Base):
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=False)
-    email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True)
+    username = Column(String, unique=True, index=True)
+    full_name = Column(String)
+    hashed_password = Column(String)
+    otp_secret = Column(String)
+    disabled = Column(Boolean, default=False)
+    role = Column(Enum(Role))
 
-
-class UserBase(BaseModel):
-    username: str
-    email: str
-
-
-class UserCreate(UserBase):
-    password: str
-
-
-class User(UserBase):
-    id: int
-    username: str
-    email: str
-
-    class Config:
-        orm_mode = True
