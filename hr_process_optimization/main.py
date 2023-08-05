@@ -7,7 +7,6 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from pydantic import BaseModel
 
-import pyotp
 from sqlalchemy.orm import Session
 from app.utils import crud
 from app.models import user_model as models

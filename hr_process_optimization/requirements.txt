@@ -4,8 +4,9 @@ uvicorn==0.15.0
 sqlalchemy==1.4.25
 python-dotenv==0.19.2
 passlib==1.7.4
-pydantic==1.9.0
+pydantic
 aiosqlite==0.18.0
 python-jose[cryptography]
 passlib[bcrypt]
 pyotp
+python-multipart
