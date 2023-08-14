@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 import pyotp
 
 from app.models import user_model as models
+from app.models import candidate as candidate_models
 from app.schemas import schemas
 from app.utils.security import pwd_context
 
@@ -46,3 +47,27 @@ def update_user_self(db: Session, current_user: schemas.User, user_update: schem
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+# add resume to resumes table
+def add_resume(db: Session, resume: schemas.Resume):
+    db_resume = candidate_models.Resume(
+        user_id=resume.get("user_id"),
+        education=resume.get("education"),
+        experience=resume.get("experience"),
+        skills=resume.get("skills"),
+        projects=resume.get("projects"),
+        resume_path=resume.get("resume_path"),
+        name=resume.get("name"),
+        email=resume.get("email")
+    )
+    # convert list to string
+    db_resume.education = ','.join(db_resume.education)
+    db_resume.experience = ','.join(db_resume.experience)
+    db_resume.skills = ','.join(db_resume.skills)
+    db_resume.projects = ','.join(db_resume.projects)
+
+    db.add(db_resume)
+    db.commit()
+    db.refresh(db_resume)
+    return db_resume

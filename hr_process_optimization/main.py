@@ -34,11 +34,14 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app = FastAPI()
+
+# import routes from routes folder
+from app.routes.candidate import router as candidate_router
+
+app.include_router(candidate_router, tags=["Candidate"], prefix="/candidate")
 
 
 def verify_password(plain_password, hashed_password):

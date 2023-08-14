@@ -14,11 +14,7 @@ def register_user(user_data: UserCreate):
 
     # Check if user already exists
     query = select(User.username, User.email)
-    results = results = db.session.execute(query)
-
-    print(results)
-
-
+    results = db.session.execute(query)
 
     # If the user does not exist, create a new user
     hashed_password = get_password_hash(user_data.password)

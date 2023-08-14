@@ -37,3 +37,30 @@ class User(UserBase):
 
     class Config:
         orm_mode = True
+
+
+from typing import List
+
+class JobDescription(BaseModel):
+    title: str
+    description: str
+
+class ScreeningQuestion(BaseModel):
+    question: str
+    importance: int
+
+class Resume(BaseModel):
+    user_id: int
+    education: List[str]
+    experience: List[str]
+    skills: List[str]
+    projects: List[str]
+
+class ShortlistedCandidate(BaseModel):
+    user_id: int
+    resume_id: int
+
+class InterviewFeedback(BaseModel):
+    user_id: int
+    resume_id: int
+    feedback: str
