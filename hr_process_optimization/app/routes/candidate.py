@@ -47,3 +47,11 @@ async def upload_resume(file: UploadFile = File(...), user_id: int = None, db: S
     except Exception as e:
         return {"error": str(e)}
 
+# apply to job
+@router.post("/apply_to_job/")
+async def apply_to_job(db: Session = Depends(get_db), user_id: int = None):
+    try:
+        # add user-id to job application
+        return {"message": "Job application submitted successfully."}
+    except Exception as e:
+        return {"error": str(e)}

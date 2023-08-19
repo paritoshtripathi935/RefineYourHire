@@ -29,11 +29,13 @@ def get_db():
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 app = FastAPI()
+
 # import routes from routes folder
 from app.routes.candidate import router as candidate_router
 from app.routes.auth import router as auth_router
+from app.routes.job import router as job_router
 
 app.include_router(candidate_router, tags=["Candidate"], prefix="/candidate")
-app.include_router(auth_router, tags=["Authentication"], prefix="/auth")
-
+app.include_router(auth_router, tags=["User Authentication"], prefix="/auth")
+app.include_router(job_router, tags=["Job"], prefix="/job")
 

@@ -15,3 +15,8 @@ class User(Base):
     disabled = Column(Boolean, default=False)
     role = Column(Enum(Role))
 
+from pydantic import BaseModel
+
+class LoginPayload(BaseModel):
+    username: str
+    password: str

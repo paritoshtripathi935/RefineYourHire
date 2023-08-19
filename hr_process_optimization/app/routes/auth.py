@@ -15,8 +15,9 @@ from app.utils.database import SessionLocal, engine
 from app.utils.security import pwd_context
 
 models.Base.metadata.create_all(bind=engine)
+from fastapi import APIRouter
 
-router = FastAPI()
+router = APIRouter()
 
 
 # Dependency
@@ -36,19 +37,19 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-def verify_password(plain_password, hashed_password):
+async def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def get_password_hash(password):
+async def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def get_user(db: Session, username: str):
+async def get_user(db: Session, username: str):
     return crud.get_user_by_username(db, username)
 
 
-def authenticate_user(db: Session, username: str, password: str):
+async def authenticate_user(db: Session, username: str, password: str):
     user = get_user(db, username)
     if not user:
         return False
@@ -61,7 +62,7 @@ def authenticate_user(db: Session, username: str, password: str):
     return user
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+async def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -72,7 +73,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-def get_current_user(token: str = Depends(oauth2_scheme),
+async def get_current_user(token: str = Depends(oauth2_scheme),
                      db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -93,14 +94,14 @@ def get_current_user(token: str = Depends(oauth2_scheme),
     return user
 
 
-def get_current_active_user(
+async def get_current_active_user(
         current_user: schemas.User = Depends(get_current_user)):
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 
-def get_current_active_admin_user(
+async def get_current_active_admin_user(
         current_user: schemas.User = Depends(get_current_active_user), ):
     if current_user.role != schemas.Role.admin:
         raise HTTPException(status_code=400,
@@ -109,7 +110,7 @@ def get_current_active_admin_user(
 
 
 @router.post("/token", response_model=schemas.Token)
-def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(),
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(),
                            db: Session = Depends(get_db)):
     
     print(form_data.username, form_data.password)
@@ -133,13 +134,13 @@ async def read_users_me(
 
 
 @router.put("/users/me/", response_model=schemas.User)
-def user_update_own_record(user_update: schemas.UserUpdate, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_active_user)):
+async def user_update_own_record(user_update: schemas.UserUpdate, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_active_user)):
     db_user = crud.update_user_self(db, current_user, user_update)
     return db_user
     
 
 @router.get("/users/{user_id}", response_model=schemas.User)
-def get_user_by_id(
+async def get_user_by_id(
     user_id: int,
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_active_admin_user)):
@@ -148,7 +149,7 @@ def get_user_by_id(
 
 
 @router.post("/users/", response_model=schemas.User)
-def create_new_user(
+async def create_new_user(
     user: schemas.UserCreate,
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_active_admin_user)):
@@ -159,7 +160,7 @@ def create_new_user(
 # make a signup api endpoint that doesnot rqeuire authentication
 
 @router.post("/signup/", response_model=schemas.User)
-def signup(
+async def signup(
     user: schemas.UserCreate,
     db: Session = Depends(get_db)):
     db_user = crud.create_user(db, user)
@@ -168,7 +169,7 @@ def signup(
 # login api endpoint that doesnot require authentication
 
 @router.post("/login/", response_model=schemas.Token)
-def login(payload: models.LoginPayload, db: Session = Depends(get_db)):
+async def login(payload: models.LoginPayload, db: Session = Depends(get_db)):
 
     # check if user exists
     user = authenticate_user(db, payload.username, payload.password)
