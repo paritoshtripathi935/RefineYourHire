@@ -1,2 +1,3 @@
 venv
 hr_process_optimization/.env
+hr_process_optimization/__pycache__
