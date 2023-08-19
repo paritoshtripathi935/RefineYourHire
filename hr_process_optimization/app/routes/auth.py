@@ -164,3 +164,24 @@ def signup(
     db: Session = Depends(get_db)):
     db_user = crud.create_user(db, user)
     return db_user
+
+# login api endpoint that doesnot require authentication
+
+@router.post("/login/", response_model=schemas.Token)
+def login(payload: models.LoginPayload, db: Session = Depends(get_db)):
+
+    # check if user exists
+    user = authenticate_user(db, payload.username, payload.password)
+
+    print(user)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password")
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": user.username},
+                                       expires_delta=access_token_expires)
+    
+    return {"access_token": access_token, "token_type": "bearer"}
