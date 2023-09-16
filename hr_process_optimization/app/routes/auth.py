@@ -1,24 +1,23 @@
 from datetime import datetime, timedelta
 from typing import Optional
-
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from pydantic import BaseModel
-
 from sqlalchemy.orm import Session
 from app.utils import crud
 from app.models import user_model as models
 from app.schemas import schemas
 from app.utils.database import SessionLocal, engine
-
 from app.utils.security import pwd_context
+from fastapi import APIRouter
+from dotenv import load_dotenv
+import os
+
 
 models.Base.metadata.create_all(bind=engine)
-from fastapi import APIRouter
-
 router = APIRouter()
-
+load_dotenv()
 
 # Dependency
 def get_db():
@@ -28,41 +27,49 @@ def get_db():
     finally:
         db.close()
 
-# to get a string like this run:
-# openssl rand -hex 32
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
 async def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
-
 
 async def get_password_hash(password):
     return pwd_context.hash(password)
 
-
 async def get_user(db: Session, username: str):
-    return crud.get_user_by_username(db, username)
-
+    return await crud.get_user_by_username(db, username)
 
 async def authenticate_user(db: Session, username: str, password: str):
-    user = get_user(db, username)
+    """
+    Authenticate a user by checking their credentials.
+
+    :param db: Database session.
+    :param username: User's username.
+    :param password: User's password.
+    :return: User object if authentication succeeds, False otherwise.
+    """
+    user = await get_user(db, username)
     if not user:
         return False
-    if verify_password(password, user.hashed_password) is False:
+    if await verify_password(password, user.hashed_password) is False:
         print("password is false")
         return False
-    #totp = pyotp.TOTP(user.otp_secret)
-    #if not totp.verify(password[-6:]):
-    #    return False
+    
     return user
 
 
 async def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+
+    """
+    Create an access token for a user.
+
+    :param data: Dictionary containing user data to be encoded in the token.
+    :param expires_delta: Optional timedelta for token expiration.
+    :return: Encoded JWT access token.
+    """
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -112,9 +119,14 @@ async def get_current_active_admin_user(
 @router.post("/token", response_model=schemas.Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(),
                            db: Session = Depends(get_db)):
-    
-    print(form_data.username, form_data.password)
-    user = authenticate_user(db, form_data.username, form_data.password)
+    """
+    Get an access token for a user based on their username and password.
+
+    :param form_data: OAuth2PasswordRequestForm containing username and password.
+    :param db: Database session.
+    :return: Token response containing the access token.
+    """
+    user = await authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -122,7 +134,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.username},
+    access_token = await create_access_token(data={"sub": user.username},
                                        expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -135,7 +147,7 @@ async def read_users_me(
 
 @router.put("/users/me/", response_model=schemas.User)
 async def user_update_own_record(user_update: schemas.UserUpdate, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_active_user)):
-    db_user = crud.update_user_self(db, current_user, user_update)
+    db_user = await crud.update_user_self(db, current_user, user_update)
     return db_user
     
 
@@ -144,7 +156,7 @@ async def get_user_by_id(
     user_id: int,
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_active_admin_user)):
-    db_user = crud.get_user(db, user_id)
+    db_user = await crud.get_user(db, user_id)
     return db_user
 
 
@@ -153,36 +165,48 @@ async def create_new_user(
     user: schemas.UserCreate,
     db: Session = Depends(get_db),
     current_user: schemas.User = Depends(get_current_active_admin_user)):
-    db_user = crud.create_user(db, user)
+    db_user = await crud.create_user(db, user)
     return db_user
 
 
 # make a signup api endpoint that doesnot rqeuire authentication
-
 @router.post("/signup/", response_model=schemas.User)
 async def signup(
     user: schemas.UserCreate,
     db: Session = Depends(get_db)):
-    db_user = crud.create_user(db, user)
+    """
+    Signup endpoint that does not require authentication.
+
+    :param user: UserCreate containing username, password, and role.
+    :param db: Database session.
+    :return: User response containing the created user.
+    """
+
+    db_user = await crud.create_user(db, user)
     return db_user
 
 # login api endpoint that doesnot require authentication
 
 @router.post("/login/", response_model=schemas.Token)
 async def login(payload: models.LoginPayload, db: Session = Depends(get_db)):
+    """
+    Login endpoint that does not require authentication.
+
+    :param payload: LoginPayload containing username and password.
+    :param db: Database session.
+    :return: Token response containing the access token.
+    """
+
 
     # check if user exists
-    user = authenticate_user(db, payload.username, payload.password)
-
-    print(user)
-
+    user = await authenticate_user(db, payload.username, payload.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password")
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.username},
+    access_token = await create_access_token(data={"sub": user.username},
                                        expires_delta=access_token_expires)
     
     return {"access_token": access_token, "token_type": "bearer"}

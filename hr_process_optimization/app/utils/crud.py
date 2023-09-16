@@ -7,23 +7,23 @@ from app.schemas import schemas
 from app.utils.security import pwd_context
 
 
-def get_user(db: Session, user_id: int):
+async def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
 
-def get_user_by_email(db: Session, email: str):
+async def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 
-def get_user_by_username(db: Session, username: str):
+async def get_user_by_username(db: Session, username: str):
     return db.query(models.User).filter(models.User.username == username).first()
 
 
-def get_users(db: Session, skip: int = 0, limit: int = 100):
+async def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
 
 
-def create_user(db: Session, user: schemas.UserCreate):
+async def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = pwd_context.hash(user.password)
     db_user = models.User(
         email=user.email,
@@ -38,7 +38,7 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.refresh(db_user)
     return db_user
 
-def update_user_self(db: Session, current_user: schemas.User, user_update: schemas.UserUpdate):
+async def update_user_self(db: Session, current_user: schemas.User, user_update: schemas.UserUpdate):
     db_user = get_user(db, current_user.id)
     db_user.email = user_update.email
     db_user.username = user_update.username
@@ -50,7 +50,7 @@ def update_user_self(db: Session, current_user: schemas.User, user_update: schem
 
 
 # add resume to resumes table
-def add_resume(db: Session, resume: schemas.Resume):
+async def add_resume(db: Session, resume: schemas.Resume):
     db_resume = candidate_models.Resume(
         user_id=resume.get("user_id"),
         education=resume.get("education"),
@@ -59,7 +59,8 @@ def add_resume(db: Session, resume: schemas.Resume):
         projects=resume.get("projects"),
         resume_path=resume.get("resume_path"),
         name=resume.get("name"),
-        email=resume.get("email")
+        email=resume.get("email"),
+        resume_id=resume.get("resume_id")
     )
     # convert list to string
     db_resume.education = ','.join(db_resume.education)
@@ -71,3 +72,12 @@ def add_resume(db: Session, resume: schemas.Resume):
     db.commit()
     db.refresh(db_resume)
     return db_resume
+
+
+async def get_resume(db: Session, user_id: int) -> bool:
+    check = db.query(candidate_models.Resume).filter(candidate_models.Resume.user_id == user_id).first()
+
+    if check:
+        return True
+    else:
+        return False

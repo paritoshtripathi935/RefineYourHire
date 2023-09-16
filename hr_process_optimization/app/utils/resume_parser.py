@@ -1,25 +1,24 @@
 import nltk
-nltk.download('stopwords')
 from pyresparser import ResumeParser
-import os
-import pandas as pd
 from docx import Document
-import sqlite3
+#import spacy
+#spacy.cli.download("en_core_web_sm")
+nltk.download('stopwords')
 
 class ResumeExtractor:
     def __init__(self):
         self.stopwords = nltk.corpus.stopwords.words('english')
 
-    def read_docx(self, path):
+    async def read_docx(self, path):
         doc = Document(path)
         full_text = []
         for para in doc.paragraphs:
             full_text.append(para.text)
         return '\n'.join(full_text)
 
-    def extract_resume_data(self, path):
+    async def extract_resume_data(self, path):
         try:
-            data = ResumeParser(path).get_extracted_data()
+            data = await ResumeParser(path).get_extracted_data()
             experience = data.get('experience', '')
             education = data.get('education', '')
             skills = data.get('skills', '')
@@ -32,8 +31,8 @@ class ResumeExtractor:
             print(f"Error extracting data from {path}: {str(e)}")
             return '', '', '', '', '', ''
 
-    def process_resume(self, resume_path):
-        experience, education, skills, name, email, projects = self.extract_resume_data(resume_path)
+    async def process_resume(self, resume_path):
+        experience, education, skills, name, email, projects = await self.extract_resume_data(resume_path)
         return {
             'experience': experience,
             'education': education,
@@ -42,4 +41,3 @@ class ResumeExtractor:
             'email': email,
             'projects': projects
         }
-
