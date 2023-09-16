@@ -1,8 +1,6 @@
 import nltk
 from pyresparser import ResumeParser
 from docx import Document
-#import spacy
-#spacy.cli.download("en_core_web_sm")
 nltk.download('stopwords')
 
 class ResumeExtractor:
@@ -18,7 +16,7 @@ class ResumeExtractor:
 
     async def extract_resume_data(self, path):
         try:
-            data = await ResumeParser(path).get_extracted_data()
+            data = ResumeParser(path).get_extracted_data()
             experience = data.get('experience', '')
             education = data.get('education', '')
             skills = data.get('skills', '')
@@ -28,8 +26,7 @@ class ResumeExtractor:
 
             return experience, education, skills, name, email, projects
         except Exception as e:
-            print(f"Error extracting data from {path}: {str(e)}")
-            return '', '', '', '', '', ''
+            return ValueError('Error in extracting resume data')
 
     async def process_resume(self, resume_path):
         experience, education, skills, name, email, projects = await self.extract_resume_data(resume_path)

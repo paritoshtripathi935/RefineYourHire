@@ -1,4 +1,4 @@
-from fastapi import UploadFile, File, Depends
+from fastapi import UploadFile, File, Depends, HTTPException
 from fastapi import APIRouter
 from app.utils.resume_parser import ResumeExtractor
 from app.utils.database import SessionLocal, engine
@@ -7,6 +7,8 @@ from app.utils.crud import add_resume, get_resume
 from sqlalchemy.orm import Session
 import uuid
 import os
+import traceback
+
 
 async def get_uuid():
     return uuid.uuid4()
@@ -29,13 +31,14 @@ ResumeModel.metadata.create_all(bind=engine)
 async def upload_resume(file: UploadFile = File(...), user_id: int = None, db: Session = Depends(get_db)):
     try:
         resume_bytes = await file.read()
-        resume_path = f"resumes/{file.filename}"
+        resume_path = f"app/resumes/{file.filename}"
         os.makedirs(os.path.dirname(resume_path), exist_ok=True)
         
         with open(resume_path, "wb") as f:
             f.write(resume_bytes)
 
-        resume_data = await extractor.process_resume(resume_path)  # Use await here
+        resume_data = await ResumeExtractor().process_resume(resume_path)
+
 
         # Assign user_id to resume_data
         resume_data["user_id"] = user_id
@@ -46,7 +49,6 @@ async def upload_resume(file: UploadFile = File(...), user_id: int = None, db: S
         check = await get_resume(db, user_id)
 
         if check:
-            # Update resume
             resume = await add_resume(db, resume_data)
             return {"message": "Resume updated successfully", "resumeData": resume_data}
         else:
@@ -55,9 +57,9 @@ async def upload_resume(file: UploadFile = File(...), user_id: int = None, db: S
             return {"message": "Resume uploaded and processed successfully", "resumeData": resume_data}
     
     except Exception as e:
-        return {"error": str(e)}
-
-
+        print(traceback.format_exc())
+        return HTTPException(status_code=502, detail=str(e))
+    
 # apply to job
 @router.post("/apply_to_job/")
 async def apply_to_job(db: Session = Depends(get_db), user_id: int = None):
