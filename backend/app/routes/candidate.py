@@ -45,6 +45,8 @@ async def upload_resume(file: UploadFile = File(...), user_id: int = None, db: S
         resume_data["resume_path"] = resume_path
         resume_data["resume_id"] = str(uuid.uuid4())
 
+        print(resume_data)
+
         # Check if user already has a resume
         check = await get_resume(db, user_id)
 
