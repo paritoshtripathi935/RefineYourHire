@@ -1,5 +1,7 @@
 # LLM-Based HR Process Optimization Application
 
+![HR Process Optimization](homepage_image.png)
+
 ## Overview
 
 The LLM-Based HR Process Optimization Application is a powerful tool that simplifies and enhances HR processes using Language, Logic, and Machine Learning (LLM) techniques. By leveraging Natural Language Processing, machine learning, and analytics, this user-friendly, scalable, and customizable application aims to improve the efficiency, effectiveness, and decision-making in HR operations.
@@ -60,5 +62,3 @@ We welcome contributions from the community to enhance and expand the functional
 The LLM-Based HR Process Optimization Application is open-source software licensed under the [MIT License](LICENSE). You are free to use, modify, and distribute the software in compliance with the terms specified in the license.
 
 ---
-
-Feel free to use this template for your README.md file and customize it according to your application's details. Happy coding!
