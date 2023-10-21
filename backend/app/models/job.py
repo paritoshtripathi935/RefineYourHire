@@ -1,6 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel
-from app.utils.database import Base
+from backend.app.utils.database import Base
 from sqlalchemy import create_engine, Column, Integer, String
 
 class Jobs(Base):

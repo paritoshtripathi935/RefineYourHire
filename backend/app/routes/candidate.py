@@ -1,9 +1,9 @@
 from fastapi import UploadFile, File, Depends, HTTPException
 from fastapi import APIRouter
-from app.utils.resume_parser import ResumeExtractor
-from app.utils.database import SessionLocal, engine
-from app.models.candidate import Resume as ResumeModel
-from app.utils.crud import add_resume, get_resume
+from backend.app.utils.resume_parser import ResumeExtractor
+from backend.app.utils.database import SessionLocal, engine
+from backend.app.models.candidate import Resume as ResumeModel
+from backend.app.utils.crud import add_resume, get_resume
 from sqlalchemy.orm import Session
 import uuid
 import os

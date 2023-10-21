@@ -8,12 +8,14 @@ from jose import JWTError, jwt
 from pydantic import BaseModel
 
 from sqlalchemy.orm import Session
-from app.utils import crud
-from app.models import user_model as models
-from app.schemas import schemas
-from app.utils.database import SessionLocal, engine
-
-from app.utils.security import pwd_context
+from backend.app.utils import crud
+from backend.app.models import user_model as models
+from backend.app.schemas import schemas
+from backend.app.utils.database import SessionLocal, engine
+from backend.app.utils.security import pwd_context
+from fastapi.responses import FileResponse
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -31,11 +33,20 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 app = FastAPI()
 
 # import routes from routes folder
-from app.routes.candidate import router as candidate_router
-from app.routes.auth import router as auth_router
-from app.routes.job import router as job_router
+from backend.app.routes.candidate import router as candidate_router
+from backend.app.routes.auth import router as auth_router
+from backend.app.routes.job import router as job_router
 
 app.include_router(candidate_router, tags=["Candidate"], prefix="/candidate")
 app.include_router(auth_router, tags=["User Authentication"], prefix="/auth")
 app.include_router(job_router, tags=["Job"], prefix="/job")
 
+# Define the path to your 'index.html' file in the frontend folder
+index_html_path = Path("frontend/index.html")
+
+@app.get("/")
+async def read_root():
+    # Serve the 'index.html' file
+    return FileResponse(index_html_path)
+
+app.mount("/static", StaticFiles(directory="frontend/static"), name="static")

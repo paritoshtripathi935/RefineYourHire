@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
 import pyotp
 
-from app.models import user_model as models
-from app.models import candidate as candidate_models
-from app.schemas import schemas
-from app.utils.security import pwd_context
+from backend.app.models import user_model as models
+from backend.app.models import candidate as candidate_models
+from backend.app.schemas import schemas
+from backend.app.utils.security import pwd_context
 
 
 async def get_user(db: Session, user_id: int):

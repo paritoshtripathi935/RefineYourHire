@@ -5,11 +5,11 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from app.utils import crud
-from app.models import user_model as models
-from app.schemas import schemas
-from app.utils.database import SessionLocal, engine
-from app.utils.security import pwd_context
+from backend.app.utils import crud
+from backend.app.models import user_model as models
+from backend.app.schemas import schemas
+from backend.app.utils.database import SessionLocal, engine
+from backend.app.utils.security import pwd_context
 from fastapi import APIRouter
 from dotenv import load_dotenv
 import os

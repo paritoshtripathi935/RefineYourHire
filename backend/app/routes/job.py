@@ -4,12 +4,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi import FastAPI, UploadFile, File, Depends
 from fastapi import APIRouter, HTTPException
-from app.schemas.schemas import JobDescription, ScreeningQuestion, ShortlistedCandidate
+from backend.app.schemas.schemas import JobDescription, ScreeningQuestion, ShortlistedCandidate
 import os
 import sqlite3
-from app.utils.database import SessionLocal, engine
+from backend.app.utils.database import SessionLocal, engine
 from sqlalchemy.orm import Session
-from app.models.job import Jobs as JobModel
+from backend.app.models.job import Jobs as JobModel
 
 
 router = APIRouter()
