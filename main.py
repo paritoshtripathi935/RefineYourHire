@@ -43,10 +43,15 @@ app.include_router(job_router, tags=["Job"], prefix="/job")
 
 # Define the path to your 'index.html' file in the frontend folder
 index_html_path = Path("frontend/index.html")
+login_html_path = Path("frontend/login.html")
 
 @app.get("/")
 async def read_root():
     # Serve the 'index.html' file
     return FileResponse(index_html_path)
+
+@app.get("/login")
+async def read_login():
+    return FileResponse(login_html_path)
 
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
