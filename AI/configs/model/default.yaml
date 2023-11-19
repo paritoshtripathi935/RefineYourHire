@@ -1,6 +1,6 @@
 gpt4all_model:
-  gpt4all_model_name: ggml-gpt4all-j-v1.3-groovy.bin
-  gpt4all_model_folder_path: /home/pamripose/ggml/gpt4all
+  gpt4all_model_name: mistral-7b-instruct-v0.1.Q4_0.gguf
+  gpt4all_model_folder_path: /Users/paritosh/Library/Application Support/nomic.ai/GPT4All
   gpt4all_backend: llama
   gpt4all_allow_streaming: true
   gpt4all_allow_downloading: true
