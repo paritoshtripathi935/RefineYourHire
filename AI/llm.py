@@ -31,14 +31,14 @@ class MyGPT4ALL(LLM):
 
     # # all the optional arguments
 
-    backend:        Optional[str]   = 'llama'
+    backend:        Optional[str]   = 'gptj'
     temp:           Optional[float] = 0.7
     top_p:          Optional[float] = 0.1
     top_k:          Optional[int]   = 40
     n_batch:        Optional[int]   = 8
     n_threads:      Optional[int]   = 4
-    n_predict:      Optional[int]   = 256
-    max_tokens:     Optional[int]   = 200
+    n_predict:      Optional[int]   = 1024
+    max_tokens:     Optional[int]   = 1024
     repeat_last_n:  Optional[int]   = 64
     repeat_penalty: Optional[float] = 1.18
 
@@ -172,23 +172,41 @@ def main(cfg):
         
     )
 
-    while True:
-        query = input('Enter your Query: ')
-        if query == 'exit':
-            break
-        # use hydra to fill the **kwargs
-        response = chat_model(
-            query,
-            n_predict=cfg.model.gpt4all_model.gpt4all_n_predict,
-            temp=cfg.model.gpt4all_model.gpt4all_temperature,
-            top_p=cfg.model.gpt4all_model.gpt4all_top_p,
-            top_k=cfg.model.gpt4all_model.gpt4all_top_k,
-            n_batch=cfg.model.gpt4all_model.gpt4all_n_batch,
-            repeat_last_n=cfg.model.gpt4all_model.gpt4all_repeat_last_n,
-            repeat_penalty=cfg.model.gpt4all_model.gpt4all_penalty,
-            max_tokens=cfg.model.gpt4all_model.gpt4all_max_tokens,
-        )
-        print()
+    query = """
+Input = [
+"The One World",
+"Artificial Intelligence and Software Development Intern",
+"Dec. 2021 – Aug. 2022",
+"Bangalore",
+
+Generate Output like this Example of from above info:
+{
+    'postion': '',
+    'company': '',
+    'start_date': '',
+    'end_date': '',
+    'location': '',
+}
+"""
+    if query == 'exit':
+        exit()
+    
+    print(f"Query: {query}")
+
+    # use hydra to fill the **kwargs
+    response = chat_model(
+        query,
+        n_predict=cfg.model.gpt4all_model.gpt4all_n_predict,
+        temp=cfg.model.gpt4all_model.gpt4all_temperature,
+        top_p=cfg.model.gpt4all_model.gpt4all_top_p,
+        top_k=cfg.model.gpt4all_model.gpt4all_top_k,
+        n_batch=cfg.model.gpt4all_model.gpt4all_n_batch,
+        repeat_last_n=cfg.model.gpt4all_model.gpt4all_repeat_last_n,
+        repeat_penalty=cfg.model.gpt4all_model.gpt4all_penalty,
+        max_tokens=cfg.model.gpt4all_model.gpt4all_max_tokens,
+    )
+    print(f"Response: {response}")
+    # print()
 
 if __name__ == '__main__':
     main()
