@@ -1,0 +1,4 @@
+pydantic
+langchain
+gpt4all
+hydra-core
