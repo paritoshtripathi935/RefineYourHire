@@ -1,3 +1,4 @@
+numpy==1.26.4
 aiosqlite==0.18.0
 asgiref==3.7.2
 bcrypt==4.0.1

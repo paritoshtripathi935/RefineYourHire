@@ -7,7 +7,6 @@ from backend.app.utils.crud import add_resume, get_resume
 from sqlalchemy.orm import Session
 import uuid
 import os
-import traceback
 
 
 async def get_uuid():
@@ -39,27 +38,21 @@ async def upload_resume(file: UploadFile = File(...), user_id: int = None, db: S
 
         resume_data = await ResumeExtractor().process_resume(resume_path)
 
-
-        # Assign user_id to resume_data
         resume_data["user_id"] = user_id
         resume_data["resume_path"] = resume_path
         resume_data["resume_id"] = str(uuid.uuid4())
 
-        print(resume_data)
-
-        # Check if user already has a resume
         check = await get_resume(db, user_id)
 
         if check:
             resume = await add_resume(db, resume_data)
             return {"message": "Resume updated successfully", "resumeData": resume_data}
+        
         else:
-            # Add resume
             resume = await add_resume(db, resume_data)
             return {"message": "Resume uploaded and processed successfully", "resumeData": resume_data}
     
     except Exception as e:
-        print(traceback.format_exc())
         return HTTPException(status_code=502, detail=str(e))
     
 # apply to job

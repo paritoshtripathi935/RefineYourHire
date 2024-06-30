@@ -1,24 +1,15 @@
-# code originally from - https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
-from datetime import datetime, timedelta
-from typing import Optional
-
-from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
-from pydantic import BaseModel
-
-from sqlalchemy.orm import Session
-from backend.app.utils import crud
+from fastapi import FastAPI
+from fastapi.security import OAuth2PasswordBearer
 from backend.app.models import user_model as models
-from backend.app.schemas import schemas
 from backend.app.utils.database import SessionLocal, engine
-from backend.app.utils.security import pwd_context
 from fastapi.responses import FileResponse
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
-
+from backend.app.routes.candidate import router as candidate_router
+from backend.app.routes.auth import router as auth_router
+from backend.app.routes.job import router as job_router
+import uvicorn
 models.Base.metadata.create_all(bind=engine)
-
 
 # Dependency
 def get_db():
@@ -28,14 +19,8 @@ def get_db():
     finally:
         db.close()
 
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 app = FastAPI()
-
-# import routes from routes folder
-from backend.app.routes.candidate import router as candidate_router
-from backend.app.routes.auth import router as auth_router
-from backend.app.routes.job import router as job_router
 
 app.include_router(candidate_router, tags=["Candidate"], prefix="/candidate")
 app.include_router(auth_router, tags=["User Authentication"], prefix="/auth")
@@ -55,3 +40,6 @@ async def read_login():
     return FileResponse(login_html_path)
 
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8001)

@@ -1,4 +1,0 @@
-pydantic
-langchain
-gpt4all==0.2.3
-hydra-core
